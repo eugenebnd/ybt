@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 import time
 import tempfile
+import os
 
 def simulate_view(video_id):
     try:
@@ -20,14 +21,33 @@ def simulate_view(video_id):
         options.add_argument("--mute-audio")
 
         driver = webdriver.Chrome(options=options)
+        driver.set_window_size(1920, 1080)  # Set the window size
         driver.get(f"https://www.youtube.com/watch?v={video_id}")
         time.sleep(5)  # Wait for the video to load
+
+        # Take a screenshot before playing
+        screenshot_path = f"screenshot_before_{video_id}.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved to {os.path.abspath(screenshot_path)}")
 
         # Use the updated method to find elements
         body = driver.find_element(By.TAG_NAME, 'body')
         body.send_keys(Keys.SPACE)  # Play the video
 
-        time.sleep(37)  # Watch the video for 10 seconds
+        # Wait a bit and take another screenshot while playing
+        time.sleep(10)
+        screenshot_path = f"screenshot_during_{video_id}.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved to {os.path.abspath(screenshot_path)}")
+
+        # Continue watching
+        time.sleep(27)  # Complete the total 37 seconds of watching
+
+        # Take a final screenshot
+        screenshot_path = f"screenshot_after_{video_id}.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved to {os.path.abspath(screenshot_path)}")
+
         driver.quit()
 
     except WebDriverException as e:
