@@ -1,7 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, NoSuchElementException, TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 import tempfile
 import os
@@ -19,14 +21,49 @@ def simulate_view(video_id):
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--headless")  # Run in headless mode
         options.add_argument("--mute-audio")
+        options.add_argument("--window-size=1920,1080")
+
+        # Add language preference to get English consent dialog
+        options.add_argument("--lang=en-US")
 
         driver = webdriver.Chrome(options=options)
-        driver.set_window_size(1920, 1080)  # Set the window size
         driver.get(f"https://www.youtube.com/watch?v={video_id}")
-        time.sleep(5)  # Wait for the video to load
 
-        # Take a screenshot before playing
-        screenshot_path = f"screenshot_before_{video_id}.png"
+        # Take a screenshot before accepting cookies
+        screenshot_path = f"screenshot_before_cookies_{video_id}.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved to {os.path.abspath(screenshot_path)}")
+
+        # Wait for the page to load
+        time.sleep(10)
+
+        # Try multiple approaches to handle the cookie consent dialog
+        try:
+            # Method 1: Try to find the button by its text content (case insensitive)
+            try:
+                accept_buttons = driver.find_elements(By.XPATH,
+                    "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept all') or contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree') or contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'i agree')]")
+
+                if accept_buttons:
+                    for button in accept_buttons:
+                        try:
+                            print(f"Found button with text: {button.text}")
+                            driver.execute_script("arguments[0].click();", button)
+                            print("Clicked button using JavaScript")
+                            time.sleep(2)
+                            break
+                        except Exception as e:
+                            print(f"Failed to click button: {e}")
+                else:
+                    print("No buttons with accept/agree text found")
+            except Exception as e:
+                print(f"Method 1 failed: {e}")
+
+        except Exception as e:
+            print(f"Could not handle consent dialog: {e}")
+
+        # Take a screenshot after attempting to handle cookies
+        screenshot_path = f"screenshot_after_cookies_{video_id}.png"
         driver.save_screenshot(screenshot_path)
         print(f"Screenshot saved to {os.path.abspath(screenshot_path)}")
 
@@ -55,7 +92,7 @@ def simulate_view(video_id):
         print("Ensure that ChromeDriver is installed and the path is correct.")
 
 def main():
-    video_id = "DxI8qY_N-N4"
+    video_id = "sYd2VK1uy2s"
     simulate_view(video_id)
 
 if __name__ == "__main__":
