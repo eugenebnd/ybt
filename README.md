@@ -13,3 +13,7 @@ This is an example Python app that simulates a view for a particular video.
    ```
    python example_app.py
    ```
+
+
+root@ubuntu-4gb-nbg1-2:~/git/ybt# python3 -m venv .venv
+root@ubuntu-4gb-nbg1-2:~/git/ybt# source .venv/bin/activate
