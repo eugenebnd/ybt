@@ -27,7 +27,7 @@ def simulate_view(video_id):
         body = driver.find_element(By.TAG_NAME, 'body')
         body.send_keys(Keys.SPACE)  # Play the video
 
-        time.sleep(10)  # Watch the video for 10 seconds
+        time.sleep(37)  # Watch the video for 10 seconds
         driver.quit()
 
     except WebDriverException as e:
@@ -35,7 +35,7 @@ def simulate_view(video_id):
         print("Ensure that ChromeDriver is installed and the path is correct.")
 
 def main():
-    video_id = input("Enter the video ID to simulate a view: ")
+    video_id = "DxI8qY_N-N4"
     simulate_view(video_id)
 
 if __name__ == "__main__":
